@@ -1,72 +1,98 @@
-// READLINE
+const yargs = require("yargs")
+const { simpanContact, listContact, detailContact, deleteContact } = require("./contact")
+// console.log(yargs.argv)
 
-const fs = require('fs');
-const { stdout } = require("process");
-const readline = require("readline");
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-});
-
-const dirPath = "./data";
-if (!fs.existsSync(dirPath)) {
-    fs.mkdirSync(dirPath)
-}
-
-// membuat file contact.json jika belum ada 
-const dataPath = "./data/contact.json";
-
-if (!fs.existsSync(dataPath)) {
-    fs.writeFileSync(dataPath, '[]', 'utf-8');
-}
-
-const tulisPertanyaan = (pertanyaan) => {
-    return new Promise((resolve, reject) => {
-        rl.question(pertanyaan, (nama) => {
-            resolve(nama);
-        });
-    });
-};
-// const pertanyaan2 = () => {
-//     return new Promise((resolve, reject) => {
-//         rl.question("Masukkan Email anda :", (email) => {
-//             resolve(email);
-//         });
+// yargs.command(
+//     'add',
+//     'Menambahkan kontak baru',
+//     () => { }, (argv) => {
+//         console.log(argv.nama)
 //     });
-// };
+
+// yargs.parse()
 
 
-const main = async () => {
-    const nama = await tulisPertanyaan("Masukkan nama anda")
-    const email = await tulisPertanyaan("Masukkan email anda")
-    const hp = await tulisPertanyaan("Masukkan hp anda")
-    // const email = await pertanyaan2()
-    const contact = { nama, email, hp };
-    const file = fs.readFileSync(dataPath, 'utf-8');
-    const contacts = JSON.parse(file);
-    contacts.push(contact);
+yargs.command({
+    command: "add",
+    describe: "untuk menambahkan kontak baru",
+    builder: {
+        nama: {
+            describe: "Nama Lengkap",
+            demandOption: true,
+            type: 'string'
+        },
+        email: {
+            describe: "Email",
+            demandOption: false,
+            type: 'string'
+        },
+        hp: {
+            describe: "No telp",
+            demandOption: true,
+            type: "String"
+        }
+    },
+    handler(argv) {
+        // const contact = {
+        //     nama: argv.nama,
+        //     email: argv.email,
+        //     hp: argv.hp
+        // }
+        // console.log(contact)
+        simpanContact(argv.nama, argv.email, argv.hp)
+    }
+}).demandCommand()
 
-    fs.writeFileSync(dataPath, JSON.stringify(contacts), 'utf-8');
-    console.log(contact);
-    rl.close();
-}
+
+// menampilkan semua nama & no hp concact
+yargs.command({
+    command: 'list',
+    describe: "menampilkan semua nama & no HP contact",
+    handler() {
+        listContact();
+    }
+})
+
+yargs.command({
+    command: 'detail',
+    describe: "menampilkan detail sebuah kontak",
+    builder: {
+        nama: {
+            describe: "nama lengkap",
+            demandOption: true,
+            type: 'string',
+        }
+    },
+    handler(argv) {
+        detailContact(argv.nama)
+    }
+})
+
+yargs.command({
+    command: 'delete',
+    describe: "Menghapus kontak berdasarkan nama",
+    builder: {
+        nama: {
+            describe: "nama lengkap",
+            demandOption: true,
+            type: 'string',
+        }
+    },
+    handler(argv) {
+        deleteContact(argv.nama)
+    }
+})
+
+yargs.parse()
 
 
-main();
-// rl.question("masukan no hp anda: ", (hp) => {
 
-// })
-
-
-// rl.question("masukan no hp anda: ", (hp) => {
-//     rl.question("Masukkan nama anda : ", (nama) => {
-//         const contact = { nama, hp };
-//         const file = fs.readFileSync(dataPath, 'utf-8');
-//         const contacts = JSON.parse(file);
-//         contacts.push(contact);
-
-//         fs.writeFileSync(dataPath, JSON.stringify(contacts), 'utf-8');
-//         console.log(contact);
-//         rl.close();
-//     })
-// })
+// =+=+=++=+==+==++==+++==++====++++=====++++===+=====+=+=++=+==+==++==+++==++====++++=========++++===+====
+// const contact = require('./contact')
+// const main = async () => {
+//     const nama = await contact.tulisPertanyaan("Masukkan nama anda")
+//     const email = await contact.tulisPertanyaan("Masukkan email anda")
+//     const hp = await contact.tulisPertanyaan("Masukkan hp anda")
+//     contact.simpanContact(nama, email, hp)
+// }
+// main();
